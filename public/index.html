@@ -7,11 +7,23 @@
     </head>
     <body>
         <body bgcolor="#000">
-        <button onclick="ledON()">LED ON</button>
-        <button onclick="ledOFF()">LED OFF</button>
-        <button onclick="takePicture()">Take a picture</button>
-      </br>
-        <img src="" id= "pictureContainer" alt="WebCam image  made by the webserver">
-        <script src="client.js"></script>
+        <div style="margin: 0 auto; text-align: center;">
+           <h1 style="color: red;">Image Filters</h1>
+	       <h3 style="color: red;">Filters!</h3>
+           <button onclick="ledON()">LED ON</button>
+           <button onclick="ledOFF()">LED OFF</button>
+	       <br>
+	       <br>
+           <button onclick="takePicture('sepia')">Sepia</button>
+	       <button onclick="takePicture('invert')">Invert</button>
+           <button onclick="takePicture('blur')">Blur</button>
+	       <button onclick="takePicture('contrast')">Contrast</button>
+           </br>
+           <br>
+           <br>
+           <img src="" id= "pictureContainer" alt="WebCam image  made by the webserver">
+	       <img src="" id= "alteredImg" alt="Altered Faceapp image">
+           <script src="client.js"></script>
+        </div>
     </body>
 </html>
