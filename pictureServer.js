@@ -28,7 +28,7 @@ var SerialPort = require('serialport'); // serial library
 var Readline = SerialPort.parsers.Readline; // read serial data as lines
 //-- Addition:
 var NodeWebcam = require( "node-webcam" );// load the webcam module
-
+var Jimp = require('jimp');
 //---------------------- WEBAPP SERVER SETUP ---------------------------------//
 // use express to create the simple webapp
 app.use(express.static('public')); // find pages in public directory
@@ -83,23 +83,23 @@ const parser = new Readline({
   delimiter: '\r\n'
 });
 
+var addEffect = function() {
+  var imageName = new Date().toString().replace(/[&\/\\#,+()$~%.'":*?<>{}\s-]/g, '');
+
+  console.log('making a picture at ' + imageName);
+
+  NodeWebcam.capture('public/' + imageName, opts, function(err, data){
+    io.emit('newPicture', (imageName + '.jpg'));
+  });
+};
 // Read data that is available on the serial port and send it to the websocket
 serial.pipe(parser);
 parser.on('data', function(data) {
   console.log('Data:', data);
   io.emit('server-msg', data);
-
-  var imageName = new Date().toString().replace(/[&\/\\#,+()$~%.'":*?<>{}\s-]/g, '');
-
-  console.log('making a making a picture at'+ imageName); // Second, the name is logged to the console.
-
-//Third, the picture is  taken and saved to the `public/`` folder
-    NodeWebcam.capture('public/'+imageName, opts, function( err, data ) {
-      io.emit('newPicture',(imageName+'.jpg'))
-    });
-//----------------------------------------------------------------------------//
+  addEffect();
 });
-
+ 
 //---------------------- WEBSOCKET COMMUNICATION (web browser)----------------//
 // this is the websocket event handler and say if someone connects
 // as long as someone is connected, listen for messages
@@ -120,23 +120,33 @@ io.on('connect', function(socket) {
 
   //-- Addition: This function is called when the client clicks on the `Take a picture` button.
   socket.on('takePicture', function() {
-    /// First, we create a name for the new picture.
-    /// The .replace() function removes all special characters from the date.
-    /// This way we can use it as the filename.
     var imageName = new Date().toString().replace(/[&\/\\#,+()$~%.'":*?<>{}\s-]/g, '');
-
-    console.log('making a making a picture at'+ imageName); // Second, the name is logged to the console.
-
-    //Third, the picture is  taken and saved to the `public/`` folder
-    NodeWebcam.capture('public/'+imageName, opts, function( err, data ) {
-    io.emit('newPicture',(imageName+'.jpg')); ///Lastly, the new name is send to the client web browser.
-    /// The browser will take this new name and load the picture from the public folder.
-  });
-
+    console.log("Make first image");
+    NodeWebcam.capture('public/'+imageName, opts, function(err, data){
+	    var array = [];
+	    array.push(imageName + '.jpg');
+	    Jimp.read('public/' + imageName + '.jpg', function(err, image){
+	      if(err) throw err;
+	     if(feat === "sepia"){
+	  	    image.sepia();
+	     }
+	     else if(feat === "invert"){
+		      image.invert();
+       }
+       else if(feat === "blur"){
+		      image.blur(100);
+	     }
+	     else if(feat === "contrast"){
+		      image.contrast(.25);
+	     }
+	    image.write('public/'+imageName + '_2.jpg');
+	    array.push(imageName + '_2.jpg');
+	    io.emit('twoPictures', array);
+	    });
+    });
   });
   // if you get the 'disconnect' message, say the user disconnected
   socket.on('disconnect', function() {
     console.log('user disconnected');
   });
 });
-//----------------------------------------------------------------------------//
