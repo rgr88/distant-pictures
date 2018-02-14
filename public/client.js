@@ -51,7 +51,6 @@ socket.on('server-msg', function(msg) {
       console.log("black");
       break;
     default:
-      //console.log("something else");
       break;
   }
 });

@@ -119,14 +119,13 @@ io.on('connect', function(socket) {
   });
 
   //-- Addition: This function is called when the client clicks on the `Take a picture` button.
-  socket.on('takePicture', function() {
+  socket.on('takePicture', function(feat) {
     var imageName = new Date().toString().replace(/[&\/\\#,+()$~%.'":*?<>{}\s-]/g, '');
-    console.log("Make first image");
     NodeWebcam.capture('public/'+imageName, opts, function(err, data){
 	    var array = [];
 	    array.push(imageName + '.jpg');
 	    Jimp.read('public/' + imageName + '.jpg', function(err, image){
-	      if(err) throw err;
+	     if(err) throw err;
 	     if(feat === "sepia"){
 	  	    image.sepia();
 	     }
